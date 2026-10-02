@@ -1,29 +1,69 @@
-USE QuanLySinhVien;
+USE QuanLyBanHang;
 
--- 1. Hiển thị sinh viên có tên bắt đầu bằng chữ 'h'
-SELECT *
-FROM Student
-WHERE StudentName LIKE 'h%';
+-- Bước 1: Thêm dữ liệu vào bảng Customer
+INSERT INTO Customer (cID, Name, cAge)
+VALUES
+(1, 'Minh Quan', 10),
+(2, 'Ngoc Oanh', 20),
+(3, 'Hong Ha', 50);
 
--- 2. Hiển thị thông tin lớp học có thời gian bắt đầu vào tháng 12
-SELECT *
-FROM Class
-WHERE MONTH(StartDate) = 12;
 
--- 3. Hiển thị môn học có Credit từ 3 đến 5
-SELECT *
-FROM Subject
-WHERE Credit BETWEEN 3 AND 5;
+-- Bước 2: Thêm dữ liệu vào bảng Order
+INSERT INTO `Order` (oID, cID, oDate, oTotalPrice)
+VALUES
+(1, 1, '2006-03-21', NULL),
+(2, 2, '2006-03-23', NULL),
+(3, 1, '2006-03-16', NULL);
 
--- 4. Thay đổi ClassID của sinh viên tên Hung thành 2
-UPDATE Student
-SET ClassID = 2
-WHERE StudentName = 'Hung';
 
--- 5. Hiển thị tên sinh viên, tên môn học và điểm thi
--- Sắp xếp điểm giảm dần, nếu trùng điểm thì tên tăng dần
-SELECT S.StudentName, Sub.SubName, M.Mark
-FROM Student S
-JOIN Mark M ON S.StudentID = M.StudentID
-JOIN Subject Sub ON M.SubID = Sub.SubID
-ORDER BY M.Mark DESC, S.StudentName ASC;
+-- Bước 3: Thêm dữ liệu vào bảng Product
+INSERT INTO Product (pID, pName, pPrice)
+VALUES
+(1, 'May Giat', 3),
+(2, 'Tu Lanh', 5),
+(3, 'Dieu Hoa', 7),
+(4, 'Quat', 1),
+(5, 'Bep Dien', 2);
+
+
+-- Bước 4: Thêm dữ liệu vào bảng OrderDetail
+INSERT INTO OrderDetail (oID, pID, odQTY)
+VALUES
+(1, 1, 3),
+(1, 3, 7),
+(1, 4, 2),
+(2, 1, 1),
+(2, 3, 8),
+(2, 5, 4),
+(3, 1, 1),
+(3, 3, 3);
+
+
+-- Bước 5: Hiển thị mã hóa đơn, ngày mua và tổng tiền
+SELECT oID, oDate, oTotalPrice
+FROM `Order`;
+
+
+-- Bước 6: Hiển thị khách hàng đã mua hàng và sản phẩm được mua
+SELECT DISTINCT c.Name, p.pName
+FROM Customer c
+JOIN `Order` o ON c.cID = o.cID
+JOIN OrderDetail od ON o.oID = od.oID
+JOIN Product p ON od.pID = p.pID;
+
+
+-- Bước 7: Hiển thị tên khách hàng chưa mua bất kỳ sản phẩm nào
+SELECT c.Name
+FROM Customer c
+LEFT JOIN `Order` o ON c.cID = o.cID
+LEFT JOIN OrderDetail od ON o.oID = od.oID
+WHERE od.oID IS NULL;
+
+
+-- Bước 8: Hiển thị mã hóa đơn, ngày bán và tổng giá trị từng hóa đơn
+SELECT o.oID, o.oDate,
+       SUM(od.odQTY * p.pPrice) AS oPrice
+FROM `Order` o
+JOIN OrderDetail od ON o.oID = od.oID
+JOIN Product p ON od.pID = p.pID
+GROUP BY o.oID, o.oDate;
