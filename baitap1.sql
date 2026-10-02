@@ -1,28 +1,29 @@
 USE QuanLySinhVien;
 
--- Bước 2: Hiển thị tất cả học viên
-SELECT *
-FROM Student;
-
--- Bước 3: Hiển thị học viên đang theo học
+-- 1. Hiển thị sinh viên có tên bắt đầu bằng chữ 'h'
 SELECT *
 FROM Student
-WHERE Status = true;
+WHERE StudentName LIKE 'h%';
 
--- Bước 4: Hiển thị các môn học có Credit < 10
+-- 2. Hiển thị thông tin lớp học có thời gian bắt đầu vào tháng 12
+SELECT *
+FROM Class
+WHERE MONTH(StartDate) = 12;
+
+-- 3. Hiển thị môn học có Credit từ 3 đến 5
 SELECT *
 FROM Subject
-WHERE Credit < 10;
+WHERE Credit BETWEEN 3 AND 5;
 
--- Bước 5: Hiển thị học viên lớp A1
-SELECT S.StudentId, S.StudentName, C.ClassName
-FROM Student S
-JOIN Class C ON S.ClassId = C.ClassID
-WHERE C.ClassName = 'A1';
+-- 4. Thay đổi ClassID của sinh viên tên Hung thành 2
+UPDATE Student
+SET ClassID = 2
+WHERE StudentName = 'Hung';
 
--- Bước 6: Hiển thị điểm môn CF của các học viên
-SELECT S.StudentId, S.StudentName, Sub.SubName, M.Mark
+-- 5. Hiển thị tên sinh viên, tên môn học và điểm thi
+-- Sắp xếp điểm giảm dần, nếu trùng điểm thì tên tăng dần
+SELECT S.StudentName, Sub.SubName, M.Mark
 FROM Student S
-JOIN Mark M ON S.StudentId = M.StudentId
-JOIN Subject Sub ON M.SubId = Sub.SubId
-WHERE Sub.SubName = 'CF';
+JOIN Mark M ON S.StudentID = M.StudentID
+JOIN Subject Sub ON M.SubID = Sub.SubID
+ORDER BY M.Mark DESC, S.StudentName ASC;
