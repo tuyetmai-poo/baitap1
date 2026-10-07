@@ -1,69 +1,39 @@
-USE QuanLyBanHang;
+USE QuanLySinhVien;
 
--- Bước 1: Thêm dữ liệu vào bảng Customer
-INSERT INTO Customer (cID, Name, cAge)
-VALUES
-(1, 'Minh Quan', 10),
-(2, 'Ngoc Oanh', 20),
-(3, 'Hong Ha', 50);
+-- 1. Hiển thị số lượng sinh viên ở từng nơi
+SELECT Address, COUNT(StudentId) AS 'Số lượng học viên'
+FROM Student
+GROUP BY Address;
 
 
--- Bước 2: Thêm dữ liệu vào bảng Order
-INSERT INTO `Order` (oID, cID, oDate, oTotalPrice)
-VALUES
-(1, 1, '2006-03-21', NULL),
-(2, 2, '2006-03-23', NULL),
-(3, 1, '2006-03-16', NULL);
+-- 2. Tính điểm trung bình các môn học của mỗi học viên
+SELECT S.StudentId,
+       S.StudentName,
+       AVG(M.Mark) AS 'Điểm trung bình'
+FROM Student S
+JOIN Mark M ON S.StudentId = M.StudentId
+GROUP BY S.StudentId, S.StudentName;
 
 
--- Bước 3: Thêm dữ liệu vào bảng Product
-INSERT INTO Product (pID, pName, pPrice)
-VALUES
-(1, 'May Giat', 3),
-(2, 'Tu Lanh', 5),
-(3, 'Dieu Hoa', 7),
-(4, 'Quat', 1),
-(5, 'Bep Dien', 2);
+-- 3. Hiển thị những học viên có điểm trung bình các môn học lớn hơn 15
+SELECT S.StudentId,
+       S.StudentName,
+       AVG(M.Mark) AS 'Điểm trung bình'
+FROM Student S
+JOIN Mark M ON S.StudentId = M.StudentId
+GROUP BY S.StudentId, S.StudentName
+HAVING AVG(M.Mark) > 15;
 
 
--- Bước 4: Thêm dữ liệu vào bảng OrderDetail
-INSERT INTO OrderDetail (oID, pID, odQTY)
-VALUES
-(1, 1, 3),
-(1, 3, 7),
-(1, 4, 2),
-(2, 1, 1),
-(2, 3, 8),
-(2, 5, 4),
-(3, 1, 1),
-(3, 3, 3);
-
-
--- Bước 5: Hiển thị mã hóa đơn, ngày mua và tổng tiền
-SELECT oID, oDate, oTotalPrice
-FROM `Order`;
-
-
--- Bước 6: Hiển thị khách hàng đã mua hàng và sản phẩm được mua
-SELECT DISTINCT c.Name, p.pName
-FROM Customer c
-JOIN `Order` o ON c.cID = o.cID
-JOIN OrderDetail od ON o.oID = od.oID
-JOIN Product p ON od.pID = p.pID;
-
-
--- Bước 7: Hiển thị tên khách hàng chưa mua bất kỳ sản phẩm nào
-SELECT c.Name
-FROM Customer c
-LEFT JOIN `Order` o ON c.cID = o.cID
-LEFT JOIN OrderDetail od ON o.oID = od.oID
-WHERE od.oID IS NULL;
-
-
--- Bước 8: Hiển thị mã hóa đơn, ngày bán và tổng giá trị từng hóa đơn
-SELECT o.oID, o.oDate,
-       SUM(od.odQTY * p.pPrice) AS oPrice
-FROM `Order` o
-JOIN OrderDetail od ON o.oID = od.oID
-JOIN Product p ON od.pID = p.pID
-GROUP BY o.oID, o.oDate;
+-- 4. Hiển thị thông tin các học viên có điểm trung bình lớn nhất
+SELECT S.StudentId,
+       S.StudentName,
+       AVG(M.Mark) AS 'Điểm trung bình'
+FROM Student S
+JOIN Mark M ON S.StudentId = M.StudentId
+GROUP BY S.StudentId, S.StudentName
+HAVING AVG(M.Mark) >= ALL (
+    SELECT AVG(Mark)
+    FROM Mark
+    GROUP BY StudentId
+);
